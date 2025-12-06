@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>تحويل الإحداثيات المغربي - خرائط الأقمار الصناعية</title>
+    <title>نظام تحويل الإحداثيات المغربي - تحديد النطاقات</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -77,7 +77,7 @@
         }
         
         .controls-container {
-            width: 400px;
+            width: 450px;
             background: #f8f9fa;
             padding: 20px;
             overflow-y: auto;
@@ -87,7 +87,7 @@
         @media (max-width: 768px) {
             .controls-container {
                 width: 100%;
-                height: 40%;
+                height: 45%;
                 border-left: none;
                 border-top: 3px solid #2a5298;
             }
@@ -188,23 +188,33 @@
             color: white;
         }
         
-        .results-card {
-            background: #1e3c72;
-            color: white;
-            padding: 20px;
-            border-radius: 10px;
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
             margin-top: 15px;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
         }
         
-        #output {
-            white-space: pre-wrap;
-            word-wrap: break-word;
+        .results-table th {
+            background: #1e3c72;
+            color: white;
+            padding: 12px;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .results-table td {
+            padding: 10px;
+            border: 1px solid #e0e0e0;
+            text-align: center;
             font-family: 'Courier New', monospace;
-            font-size: 0.9rem;
-            line-height: 1.5;
-            max-height: 200px;
-            overflow-y: auto;
-            direction: ltr;
+        }
+        
+        .results-table tr:nth-child(even) {
+            background: #f8f9fa;
         }
         
         .footer {
@@ -248,60 +258,57 @@
             transform: scale(1.1);
         }
         
-        .satellite-controls {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            z-index: 1000;
-            background: white;
-            padding: 10px;
-            border-radius: 10px;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
-        }
-        
-        .satellite-controls select {
-            width: 180px;
-            margin: 0;
-            padding: 8px;
-            font-size: 0.9rem;
-        }
-        
         /* تخصيص Popup */
         .leaflet-popup-content {
             font-family: 'Segoe UI', Tahoma, sans-serif;
-            text-align: center;
-            padding: 10px;
-            min-width: 200px;
+            min-width: 250px;
+            padding: 15px;
         }
         
         .popup-title {
             color: #1e3c72;
             font-weight: bold;
-            margin-bottom: 10px;
-            font-size: 1.1rem;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            text-align: center;
+            border-bottom: 2px solid #c1272d;
+            padding-bottom: 10px;
         }
         
         .popup-coords {
             background: #f8f9fa;
-            padding: 10px;
-            border-radius: 5px;
-            margin: 10px 0;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
             font-family: 'Courier New', monospace;
+            text-align: center;
+        }
+        
+        .popup-coords div {
+            margin: 5px 0;
+            padding: 5px;
+            background: white;
+            border-radius: 4px;
         }
         
         .popup-buttons {
-            display: flex;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             gap: 10px;
             margin-top: 15px;
         }
         
         .popup-btn {
-            flex: 1;
-            padding: 8px;
+            padding: 10px;
             border: none;
             border-radius: 5px;
             font-size: 0.9rem;
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            transition: all 0.3s;
         }
         
         .popup-btn.copy {
@@ -309,20 +316,29 @@
             color: white;
         }
         
-        .popup-btn.close {
-            background: #dc3545;
+        .popup-btn.copy:hover {
+            background: #218838;
+        }
+        
+        .popup-btn.download {
+            background: #17a2b8;
             color: white;
         }
         
-        /* الرسوم المتحركة */
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
+        .popup-btn.download:hover {
+            background: #138496;
         }
         
-        .pulse {
-            animation: pulse 2s infinite;
+        /* حدود النطاقات */
+        .zone-boundary {
+            stroke-dasharray: 10, 5;
+            animation: dash 20s linear infinite;
+        }
+        
+        @keyframes dash {
+            to {
+                stroke-dashoffset: -1000;
+            }
         }
         
         /* مؤشر مخصص */
@@ -362,22 +378,14 @@
                 grid-template-columns: 1fr;
             }
             
-            .satellite-controls {
-                top: 70px;
-                right: 15px;
+            .results-table {
+                font-size: 0.8rem;
             }
             
-            .satellite-controls select {
-                width: 150px;
+            .results-table th,
+            .results-table td {
+                padding: 8px;
             }
-        }
-        
-        /* تخصيص Leaflet للهواتف */
-        .leaflet-touch .leaflet-bar a {
-            width: 40px;
-            height: 40px;
-            line-height: 40px;
-            font-size: 1.5rem;
         }
     </style>
 </head>
@@ -385,8 +393,8 @@
     <div class="app-container">
         <div class="header">
             <div class="flag-icon">🇲🇦</div>
-            <h1><i class="fas fa-satellite"></i> نظام تحويل الإحداثيات المغربي</h1>
-            <p>خرائط الأقمار الصناعية مع تحويل بين أنظمة الإحداثيات</p>
+            <h1><i class="fas fa-map-marked-alt"></i> نظام تحويل الإحداثيات المغربي</h1>
+            <p>تحديد النطاقات الجغرافية والتحويل بين أنظمة الإحداثيات</p>
         </div>
         
         <div class="main-content">
@@ -404,15 +412,6 @@
                         <i class="fas fa-minus"></i>
                     </button>
                 </div>
-                
-                <div class="satellite-controls">
-                    <select id="satelliteType">
-                        <option value="googleSat">قمر صناعي Google</option>
-                        <option value="esriSat">قمر صناعي ESRI</option>
-                        <option value="bingSat">قمر صناعي Bing</option>
-                        <option value="osm">خريطة عادية</option>
-                    </select>
-                </div>
             </div>
             
             <div class="controls-container">
@@ -422,51 +421,48 @@
                         <span>اختر نظام الإحداثيات</span>
                     </div>
                     <select id="system">
-                        <option value="wgs84">WGS84 (خط العرض/خط الطول)</option>
-                        <option value="lambert">Lambert Maroc (متر)</option>
+                        <option value="lambert">Lambert Maroc (المغرب)</option>
+                        <option value="wgs84">WGS84 (عالمي)</option>
                     </select>
                 </div>
                 
-                <div class="control-card" id="wgsInputs">
+                <div class="control-card" id="lambertInputs">
                     <div class="card-title">
-                        <i class="fas fa-globe-africa"></i>
+                        <i class="fas fa-map"></i>
+                        <span>إحداثيات Lambert Maroc - المغرب</span>
+                    </div>
+                    <div class="coord-group">
+                        <div class="coord-item">
+                            <label>الإحداثي X (متر):</label>
+                            <input type="number" id="x" placeholder="أدخل قيمة X" step="0.01" value="500000">
+                        </div>
+                        <div class="coord-item">
+                            <label>الإحداثي Y (متر):</label>
+                            <input type="number" id="y" placeholder="أدخل قيمة Y" step="0.01" value="350000">
+                        </div>
+                    </div>
+                    <div style="color: #666; font-size: 0.9rem; margin-top: 10px; text-align: center;">
+                        <i class="fas fa-info-circle"></i> أدخل إحداثيات Lambert Maroc لتحديد الموقع على الخريطة
+                    </div>
+                </div>
+                
+                <div class="control-card" id="wgs84Inputs" style="display: none;">
+                    <div class="card-title">
+                        <i class="fas fa-globe"></i>
                         <span>إحداثيات WGS84</span>
                     </div>
                     <div class="coord-group">
                         <div class="coord-item">
                             <label>خط العرض (Latitude):</label>
-                            <input type="number" id="lat" placeholder="مثال: 33.5731" step="0.000001">
+                            <input type="number" id="lat" placeholder="مثال: 33.5731" step="0.000001" value="33.5731">
                         </div>
                         <div class="coord-item">
                             <label>خط الطول (Longitude):</label>
-                            <input type="number" id="lon" placeholder="مثال: -7.5898" step="0.000001">
+                            <input type="number" id="lon" placeholder="مثال: -7.5898" step="0.000001" value="-7.5898">
                         </div>
                     </div>
-                    <div style="color: #666; font-size: 0.9rem; margin-top: 10px;">
+                    <div style="color: #666; font-size: 0.9rem; margin-top: 10px; text-align: center;">
                         <i class="fas fa-info-circle"></i> انقر على الخريطة لإدخال الإحداثيات تلقائياً
-                    </div>
-                </div>
-                
-                <div class="control-card" id="lambertInputs" style="display: none;">
-                    <div class="card-title">
-                        <i class="fas fa-ruler-combined"></i>
-                        <span>إحداثيات Lambert Maroc</span>
-                    </div>
-                    <select id="zone">
-                        <option value="MAR_ZONE_I">المنطقة 1 - شمال المغرب (طنجة، فاس، الرباط)</option>
-                        <option value="MAR_ZONE_II">المنطقة 2 - وسط المغرب (أغادير، مراكش)</option>
-                        <option value="MAR_ZONE_III">المنطقة 3 - جنوب المغرب (العيون، السمارة)</option>
-                        <option value="MAR_ZONE_IV">المنطقة 4 - الصحراء المغربية (الداخلة)</option>
-                    </select>
-                    <div class="coord-group">
-                        <div class="coord-item">
-                            <label>الإحداثي X (متر):</label>
-                            <input type="number" id="x" placeholder="أدخل قيمة X" step="0.01">
-                        </div>
-                        <div class="coord-item">
-                            <label>الإحداثي Y (متر):</label>
-                            <input type="number" id="y" placeholder="أدخل قيمة Y" step="0.01">
-                        </div>
                     </div>
                 </div>
                 
@@ -475,26 +471,40 @@
                         <i class="fas fa-sync-alt"></i>
                         تحويل وعرض
                     </button>
-                    <button class="action-btn btn-success" id="exportBtn">
+                    <button class="action-btn btn-success" id="downloadAllBtn">
                         <i class="fas fa-download"></i>
-                        تصدير النتائج
+                        تحميل جميع الإحداثيات
                     </button>
                 </div>
                 
                 <div class="control-card">
                     <div class="card-title">
-                        <i class="fas fa-file-alt"></i>
+                        <i class="fas fa-table"></i>
                         <span>نتائج التحويل</span>
                     </div>
-                    <div class="results-card">
-                        <pre id="output">أدخل الإحداثيات وانقر على "تحويل وعرض"</pre>
-                    </div>
+                    <table class="results-table" id="resultsTable">
+                        <thead>
+                            <tr>
+                                <th>النظام</th>
+                                <th>X/Latitude</th>
+                                <th>Y/Longitude</th>
+                                <th>النطاق</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultsBody">
+                            <tr>
+                                <td colspan="4" style="text-align: center; color: #666;">
+                                    أدخل الإحداثيات وانقر على "تحويل وعرض"
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
         
         <div class="footer">
-            <p>© 2023 - نظام رسمي لتحويل الإحداثيات بالمملكة المغربية | خرائط الأقمار الصناعية</p>
+            <p>© 2023 - النظام الرسمي للتحويل بين أنظمة الإحداثيات بالمملكة المغربية</p>
         </div>
     </div>
 
@@ -502,11 +512,53 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.8.0/proj4.js"></script>
     
     <script>
-        // تعريف أنظمة Lambert Maroc
+        // تعريف أنظمة Lambert Maroc الأربعة
         proj4.defs("MAR_ZONE_I", "+proj=lcc +lat_1=31.72786641202 +lat_2=34.8717272112 +lat_0=33.3 +lon_0=-7 +x_0=500000 +y_0=300000 +ellps=WGS84 +units=m +no_defs");
         proj4.defs("MAR_ZONE_II", "+proj=lcc +lat_1=28.1063294800 +lat_2=31.2932791054 +lat_0=29.7 +lon_0=-7 +x_0=500000 +y_0=300000 +ellps=WGS84 +units=m +no_defs");
         proj4.defs("MAR_ZONE_III", "+proj=lcc +lat_1=24.5075340813 +lat_2=27.6921073632 +lat_0=26.1 +lon_0=-7 +x_0=1200000 +y_0=400000 +ellps=WGS84 +units=m +no_defs");
         proj4.defs("MAR_ZONE_IV", "+proj=lcc +lat_1=20.9075742561 +lat_2=24.0921050540 +lat_0=22.5 +lon_0=-7 +x_0=1500000 +y_0=400000 +ellps=WGS84 +units=m +no_defs");
+        
+        // حدود النطاقات الأربعة للمغرب (مبسطة)
+        const zoneBoundaries = {
+            "MAR_ZONE_I": [ // شمال المغرب
+                [35.92, -2.50], [35.92, -0.99], [35.40, -0.90], [35.17, -1.79],
+                [34.91, -2.19], [34.62, -2.35], [34.31, -2.61], [33.92, -4.00],
+                [33.65, -4.62], [33.38, -5.18], [33.06, -5.54], [32.56, -5.74],
+                [32.06, -5.73], [31.70, -5.85], [31.38, -6.08], [31.00, -6.90],
+                [30.23, -8.66], [29.15, -10.19], [28.00, -11.38], [27.66, -12.89],
+                [27.40, -13.16], [26.74, -12.85], [26.32, -11.71], [25.80, -11.92],
+                [25.16, -11.92], [24.80, -11.92], [24.50, -15.00], [23.70, -16.00],
+                [21.42, -17.03], [21.42, -13.15], [23.00, -12.00], [27.00, -13.00],
+                [27.66, -12.89], [28.00, -11.38], [29.15, -10.19], [30.23, -8.66],
+                [31.00, -6.90], [31.38, -6.08], [31.70, -5.85], [32.06, -5.73],
+                [32.56, -5.74], [33.06, -5.54], [33.38, -5.18], [33.65, -4.62],
+                [33.92, -4.00], [34.31, -2.61], [34.62, -2.35], [34.91, -2.19],
+                [35.17, -1.79], [35.40, -0.90], [35.92, -0.99], [35.92, -2.50]
+            ],
+            "MAR_ZONE_II": [ // وسط المغرب
+                [32.0, -9.5], [32.0, -6.0], [30.0, -6.0], [30.0, -9.5]
+            ],
+            "MAR_ZONE_III": [ // جنوب المغرب
+                [28.0, -13.0], [28.0, -9.0], [24.0, -9.0], [24.0, -13.0]
+            ],
+            "MAR_ZONE_IV": [ // الصحراء المغربية
+                [24.0, -17.0], [24.0, -13.0], [20.0, -13.0], [20.0, -17.0]
+            ]
+        };
+        
+        const zoneNames = {
+            "MAR_ZONE_I": "النطاق 1 - شمال المغرب",
+            "MAR_ZONE_II": "النطاق 2 - وسط المغرب",
+            "MAR_ZONE_III": "النطاق 3 - جنوب المغرب",
+            "MAR_ZONE_IV": "النطاق 4 - الصحراء المغربية"
+        };
+        
+        const zoneColors = {
+            "MAR_ZONE_I": "#FF0000", // أحمر
+            "MAR_ZONE_II": "#00FF00", // أخضر
+            "MAR_ZONE_III": "#0000FF", // أزرق
+            "MAR_ZONE_IV": "#FFA500" // برتقالي
+        };
         
         // إنشاء الخريطة
         const map = L.map('map', {
@@ -518,35 +570,49 @@
             boxZoom: true,
             keyboard: true,
             dragging: true
-        }).setView([31.7917, -7.0926], 7);
+        }).setView([31.7917, -7.0926], 6);
         
-        // تعريف طبقات الخرائط
-        const baseLayers = {
-            "قمر صناعي Google": L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
-                attribution: '© Google Maps',
-                maxZoom: 20,
-                subdomains: ['mt0','mt1','mt2','mt3']
-            }),
-            "قمر صناعي ESRI": L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-                attribution: '© Esri',
-                maxZoom: 19
-            }),
-            "قمر صناعي Bing": L.tileLayer('https://ecn.t3.tiles.virtualearth.net/tiles/a{q}.jpeg?g=1', {
-                attribution: '© Bing Maps',
-                maxZoom: 19,
-                subdomains: ['t0','t1','t2','t3']
-            }),
-            "خريطة عادية": L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap',
-                maxZoom: 19
-            })
-        };
-        
-        // إضافة الطبقة الافتراضية
-        baseLayers["قمر صناعي Google"].addTo(map);
+        // إضافة خريطة Google مع الأسماء
+        const googleHybrid = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+            attribution: '© Google Maps',
+            maxZoom: 20,
+            subdomains: ['mt0','mt1','mt2','mt3']
+        }).addTo(map);
         
         // إضافة مقياس الرسم
         L.control.scale({imperial: false, position: 'bottomright'}).addTo(map);
+        
+        // رسم حدود النطاقات
+        const zoneLayers = {};
+        Object.keys(zoneBoundaries).forEach(zone => {
+            zoneLayers[zone] = L.polygon(zoneBoundaries[zone], {
+                color: zoneColors[zone],
+                weight: 3,
+                fillColor: zoneColors[zone],
+                fillOpacity: 0.1,
+                className: 'zone-boundary'
+            }).addTo(map);
+            
+            // إضافة تسمية للنطاق
+            const center = getPolygonCenter(zoneBoundaries[zone]);
+            L.marker(center, {
+                icon: L.divIcon({
+                    className: 'zone-label',
+                    html: `<div style="background:${zoneColors[zone]};color:white;padding:5px 10px;border-radius:5px;font-weight:bold;">${zoneNames[zone]}</div>`,
+                    iconSize: [150, 40]
+                })
+            }).addTo(map);
+        });
+        
+        // دالة حساب مركز المضلع
+        function getPolygonCenter(coords) {
+            let lat = 0, lon = 0;
+            coords.forEach(coord => {
+                lat += coord[0];
+                lon += coord[1];
+            });
+            return [lat / coords.length, lon / coords.length];
+        }
         
         // عناصر تحكم الخريطة
         document.getElementById('zoomInBtn').addEventListener('click', () => map.zoomIn());
@@ -564,7 +630,7 @@
                         document.getElementById('system').value = 'wgs84';
                         showSystem('wgs84');
                         
-                        updateMarker(lat, lon, `موقعك الحالي<br>${lat.toFixed(6)}°, ${lon.toFixed(6)}°`);
+                        updateMarker(lat, lon, true);
                         showMessage('تم تحديد موقعك الحالي بنجاح!', 'success');
                     },
                     () => {
@@ -576,234 +642,265 @@
             }
         });
         
-        // تبديل نوع الخريطة
-        document.getElementById('satelliteType').addEventListener('change', function() {
-            const selectedLayer = this.value;
-            Object.values(baseLayers).forEach(layer => {
-                if (map.hasLayer(layer)) {
-                    map.removeLayer(layer);
-                }
-            });
-            
-            switch(selectedLayer) {
-                case 'googleSat':
-                    baseLayers["قمر صناعي Google"].addTo(map);
-                    break;
-                case 'esriSat':
-                    baseLayers["قمر صناعي ESRI"].addTo(map);
-                    break;
-                case 'bingSat':
-                    baseLayers["قمر صناعي Bing"].addTo(map);
-                    break;
-                case 'osm':
-                    baseLayers["خريطة عادية"].addTo(map);
-                    break;
-            }
-        });
-        
         // تبديل نظام الإحداثيات
         document.getElementById('system').addEventListener('change', function() {
             showSystem(this.value);
         });
         
         function showSystem(system) {
-            if (system === 'wgs84') {
-                document.getElementById('wgsInputs').style.display = 'block';
-                document.getElementById('lambertInputs').style.display = 'none';
-                document.getElementById('lat').value = '33.5731';
-                document.getElementById('lon').value = '-7.5898';
-            } else {
-                document.getElementById('wgsInputs').style.display = 'none';
+            if (system === 'lambert') {
                 document.getElementById('lambertInputs').style.display = 'block';
-                document.getElementById('x').value = '500000';
-                document.getElementById('y').value = '350000';
+                document.getElementById('wgs84Inputs').style.display = 'none';
+            } else {
+                document.getElementById('lambertInputs').style.display = 'none';
+                document.getElementById('wgs84Inputs').style.display = 'block';
             }
         }
         
+        // الكشف عن النطاق بناءً على الإحداثيات
+        function detectZone(x, y) {
+            // تحويل Lambert إلى WGS84 للكشف عن المنطقة
+            let detectedZone = "MAR_ZONE_I";
+            let minDistance = Infinity;
+            
+            Object.keys(zoneBoundaries).forEach(zone => {
+                const [lon, lat] = proj4(zone, "EPSG:4326", [x, y]);
+                const center = getPolygonCenter(zoneBoundaries[zone]);
+                const distance = Math.sqrt(Math.pow(lat - center[0], 2) + Math.pow(lon - center[1], 2));
+                
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    detectedZone = zone;
+                }
+            });
+            
+            return detectedZone;
+        }
+        
         let marker = null;
-        let popup = null;
+        let currentCoords = {};
         
         // زر التحويل
         document.getElementById('convertBtn').addEventListener('click', function() {
             const system = document.getElementById('system').value;
-            let lat, lon, x, y;
-            let output = '';
             
-            if (system === 'wgs84') {
-                lat = parseFloat(document.getElementById('lat').value);
-                lon = parseFloat(document.getElementById('lon').value);
-                
-                if (isNaN(lat) || isNaN(lon)) {
-                    showMessage('يرجى إدخال قيم صحيحة لخط العرض وخط الطول', 'error');
-                    return;
-                }
-                
-                output += '══════════════════════════════════\n';
-                output += 'نظام WGS84 (الإدخال)\n';
-                output += '══════════════════════════════════\n';
-                output += `خط العرض: ${lat.toFixed(6)}°\n`;
-                output += `خط الطول: ${lon.toFixed(6)}°\n\n`;
-                
-                output += '══════════════════════════════════\n';
-                output += 'تحويل إلى Lambert Maroc\n';
-                output += '══════════════════════════════════\n';
-                
-                const zones = ["MAR_ZONE_I", "MAR_ZONE_II", "MAR_ZONE_III", "MAR_ZONE_IV"];
-                const zoneNames = ["المنطقة 1 - شمال المغرب", "المنطقة 2 - وسط المغرب", "المنطقة 3 - جنوب المغرب", "المنطقة 4 - الصحراء المغربية"];
-                
-                zones.forEach((zone, idx) => {
-                    const [xx, yy] = proj4("EPSG:4326", zone, [lon, lat]);
-                    output += `\n${zoneNames[idx]}:\n`;
-                    output += `X: ${xx.toFixed(2)} متر\n`;
-                    output += `Y: ${yy.toFixed(2)} متر\n`;
-                });
-                
-                // تحديث الخريطة مع popup
-                const popupContent = createPopupContent('WGS84', lat, lon, null, null);
-                updateMarker(lat, lon, popupContent);
-                
-            } else {
-                const zone = document.getElementById('zone').value;
-                x = parseFloat(document.getElementById('x').value);
-                y = parseFloat(document.getElementById('y').value);
+            if (system === 'lambert') {
+                const x = parseFloat(document.getElementById('x').value);
+                const y = parseFloat(document.getElementById('y').value);
                 
                 if (isNaN(x) || isNaN(y)) {
                     showMessage('يرجى إدخال قيم صحيحة لـ X و Y', 'error');
                     return;
                 }
                 
-                // التحويل من Lambert إلى WGS84
-                [lon, lat] = proj4(zone, "EPSG:4326", [x, y]);
+                // الكشف عن النطاق
+                const zone = detectZone(x, y);
                 
-                output += '══════════════════════════════════\n';
-                output += 'نظام Lambert Maroc (الإدخال)\n';
-                output += '══════════════════════════════════\n';
-                output += `المنطقة: ${document.getElementById('zone').selectedOptions[0].text}\n`;
-                output += `X: ${x.toFixed(2)} متر\n`;
-                output += `Y: ${y.toFixed(2)} متر\n\n`;
+                // التحويل إلى WGS84
+                const [lon, lat] = proj4(zone, "EPSG:4326", [x, y]);
                 
-                output += '══════════════════════════════════\n';
-                output += 'تحويل إلى WGS84\n';
-                output += '══════════════════════════════════\n';
-                output += `خط العرض: ${lat.toFixed(6)}°\n`;
-                output += `خط الطول: ${lon.toFixed(6)}°\n\n`;
+                // تحديث الخريطة
+                updateMarker(lat, lon, false, {x, y, zone});
                 
-                // تحديث الخريطة مع popup
-                const popupContent = createPopupContent('Lambert', lat, lon, x, y, zone);
-                updateMarker(lat, lon, popupContent);
+                // تحديث الجدول
+                updateResultsTable(x, y, lat, lon, zone);
+                
+                // تخزين الإحداثيات الحالية
+                currentCoords = {x, y, lat, lon, zone};
+                
+            } else {
+                const lat = parseFloat(document.getElementById('lat').value);
+                const lon = parseFloat(document.getElementById('lon').value);
+                
+                if (isNaN(lat) || isNaN(lon)) {
+                    showMessage('يرجى إدخال قيم صحيحة لخط العرض وخط الطول', 'error');
+                    return;
+                }
+                
+                // تحديث الخريطة
+                updateMarker(lat, lon, true);
+                
+                // تحديث الجدول
+                updateResultsTable(null, null, lat, lon, null);
+                
+                // تخزين الإحداثيات الحالية
+                currentCoords = {lat, lon};
             }
             
-            output += '══════════════════════════════════\n';
-            output += `وقت التحويل: ${new Date().toLocaleString('ar-MA')}\n`;
-            output += '══════════════════════════════════\n';
-            
-            document.getElementById('output').textContent = output;
             showMessage('تم التحويل بنجاح وعرض النقطة على الخريطة', 'success');
         });
         
-        // إنشاء محتوى popup
-        function createPopupContent(system, lat, lon, x, y, zone) {
-            let content = `
+        // تحديث العلامة على الخريطة
+        function updateMarker(lat, lon, isWGS84, lambertData = null) {
+            if (marker) {
+                map.removeLayer(marker);
+            }
+            
+            marker = L.marker([lat, lon], {
+                icon: L.divIcon({
+                    className: 'custom-marker',
+                    html: '<div style="background:#c1272d;color:white;border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-weight:bold;border:3px solid white;box-shadow:0 0 20px rgba(0,0,0,0.5);">📍</div>',
+                    iconSize: [40, 40]
+                })
+            }).addTo(map);
+            
+            // إنشاء محتوى popup
+            let popupContent = `
                 <div class="popup-title">
-                    <i class="fas fa-map-marker-alt"></i> موقع محدد
+                    <i class="fas fa-map-pin"></i> معلومات النقطة
                 </div>
                 <div class="popup-coords">
-                    <strong>الإحداثيات:</strong><br>
             `;
             
-            if (system === 'WGS84') {
-                content += `
-                    WGS84:<br>
-                    خط العرض: ${lat.toFixed(6)}°<br>
-                    خط الطول: ${lon.toFixed(6)}°
-                `;
-            } else {
-                content += `
-                    Lambert ${zone}:<br>
-                    X: ${x.toFixed(2)} m<br>
-                    Y: ${y.toFixed(2)} m<br><br>
-                    WGS84:<br>
-                    خط العرض: ${lat.toFixed(6)}°<br>
-                    خط الطول: ${lon.toFixed(6)}°
+            if (lambertData) {
+                popupContent += `
+                    <div><strong>Lambert Maroc (${zoneNames[lambertData.zone]}):</strong></div>
+                    <div>X: ${lambertData.x.toFixed(2)} متر</div>
+                    <div>Y: ${lambertData.y.toFixed(2)} متر</div>
+                    <hr style="margin: 10px 0;">
                 `;
             }
             
-            content += `
+            popupContent += `
+                    <div><strong>WGS84:</strong></div>
+                    <div>Latitude: ${lat.toFixed(6)}°</div>
+                    <div>Longitude: ${lon.toFixed(6)}°</div>
                 </div>
                 <div class="popup-buttons">
-                    <button class="popup-btn copy" onclick="copyCoords(${lat}, ${lon})">
+                    <button class="popup-btn copy" onclick="copyCoords(${lat}, ${lon}${lambertData ? ', ' + lambertData.x + ', ' + lambertData.y : ''})">
                         <i class="fas fa-copy"></i> نسخ
                     </button>
-                    <button class="popup-btn close" onclick="map.closePopup()">
-                        <i class="fas fa-times"></i> إغلاق
+                    <button class="popup-btn download" onclick="downloadPointData(${lat}, ${lon}${lambertData ? ', ' + lambertData.x + ', ' + lambertData.y + ', \'' + lambertData.zone + '\'' : ''})">
+                        <i class="fas fa-download"></i> تحميل
                     </button>
                 </div>
             `;
             
-            return content;
+            marker.bindPopup(popupContent).openPopup();
+            map.setView([lat, lon], 12);
+        }
+        
+        // تحديث جدول النتائج
+        function updateResultsTable(x, y, lat, lon, zone) {
+            const resultsBody = document.getElementById('resultsBody');
+            resultsBody.innerHTML = '';
+            
+            if (x !== null && y !== null) {
+                // إضافة صف لـ Lambert Maroc
+                const lambertRow = document.createElement('tr');
+                lambertRow.innerHTML = `
+                    <td>Lambert Maroc</td>
+                    <td>${x.toFixed(2)}</td>
+                    <td>${y.toFixed(2)}</td>
+                    <td>${zoneNames[zone]}</td>
+                `;
+                resultsBody.appendChild(lambertRow);
+            }
+            
+            // إضافة صف لـ WGS84
+            const wgs84Row = document.createElement('tr');
+            wgs84Row.innerHTML = `
+                <td>WGS84</td>
+                <td>${lat.toFixed(6)}</td>
+                <td>${lon.toFixed(6)}</td>
+                <td>${zone ? zoneNames[zone] : '-'}</td>
+            `;
+            resultsBody.appendChild(wgs84Row);
+            
+            // إضافة صف للتحويل العكسي
+            if (x !== null && y !== null) {
+                Object.keys(zoneBoundaries).forEach(otherZone => {
+                    if (otherZone !== zone) {
+                        const [otherX, otherY] = proj4("EPSG:4326", otherZone, [lon, lat]);
+                        const otherRow = document.createElement('tr');
+                        otherRow.innerHTML = `
+                            <td>Lambert (${otherZone.split('_')[2]})</td>
+                            <td>${otherX.toFixed(2)}</td>
+                            <td>${otherY.toFixed(2)}</td>
+                            <td>${zoneNames[otherZone]}</td>
+                        `;
+                        resultsBody.appendChild(otherRow);
+                    }
+                });
+            }
         }
         
         // دالة نسخ الإحداثيات
-        window.copyCoords = function(lat, lon) {
-            const text = `خط العرض: ${lat.toFixed(6)}°\nخط الطول: ${lon.toFixed(6)}°`;
+        window.copyCoords = function(lat, lon, x, y) {
+            let text = `WGS84:\nLatitude: ${lat.toFixed(6)}°\nLongitude: ${lon.toFixed(6)}°`;
+            
+            if (x !== undefined && y !== undefined) {
+                text = `Lambert Maroc:\nX: ${x.toFixed(2)} متر\nY: ${y.toFixed(2)} متر\n\n${text}`;
+            }
+            
             navigator.clipboard.writeText(text).then(() => {
                 showMessage('تم نسخ الإحداثيات إلى الحافظة', 'success');
             });
         };
         
-        // تحديث العلامة على الخريطة
-        function updateMarker(lat, lon, popupContent) {
-            if (marker) {
-                marker.setLatLng([lat, lon]);
-                if (popup) {
-                    popup.setLatLng([lat, lon]).setContent(popupContent);
-                } else {
-                    popup = L.popup()
-                        .setLatLng([lat, lon])
-                        .setContent(popupContent)
-                        .openOn(map);
-                }
-            } else {
-                marker = L.marker([lat, lon], {
-                    icon: L.divIcon({
-                        className: 'custom-marker',
-                        html: '<div style="background:#c1272d;color:white;border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-weight:bold;border:3px solid white;box-shadow:0 0 20px rgba(0,0,0,0.5);">📍</div>',
-                        iconSize: [40, 40]
-                    })
-                }).addTo(map);
-                
-                popup = L.popup()
-                    .setLatLng([lat, lon])
-                    .setContent(popupContent)
-                    .openOn(map);
+        // دالة تحميل بيانات النقطة
+        window.downloadPointData = function(lat, lon, x, y, zone) {
+            let text = `=== بيانات النقطة ===\n\n`;
+            
+            if (x !== undefined && y !== undefined) {
+                text += `Lambert Maroc (${zoneNames[zone]}):\n`;
+                text += `X: ${x.toFixed(2)} متر\n`;
+                text += `Y: ${y.toFixed(2)} متر\n\n`;
             }
             
-            map.setView([lat, lon], 12);
-        }
-        
-        // زر التصدير
-        document.getElementById('exportBtn').addEventListener('click', function() {
-            const text = document.getElementById('output').textContent;
+            text += `WGS84:\n`;
+            text += `Latitude: ${lat.toFixed(6)}°\n`;
+            text += `Longitude: ${lon.toFixed(6)}°\n\n`;
+            text += `تاريخ التصدير: ${new Date().toLocaleString('ar-MA')}`;
             
-            if (text.includes('أدخل الإحداثيات')) {
-                showMessage('لا توجد بيانات للتصدير. يرجى إجراء تحويل أولاً.', 'warning');
+            const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `نقطة_${new Date().toISOString().slice(0,10)}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showMessage('تم تحميل بيانات النقطة', 'success');
+        };
+        
+        // زر تحميل جميع الإحداثيات
+        document.getElementById('downloadAllBtn').addEventListener('click', function() {
+            const resultsBody = document.getElementById('resultsBody');
+            if (resultsBody.children[0].children[0].colSpan === 4) {
+                showMessage('لا توجد بيانات للتحميل', 'warning');
                 return;
+            }
+            
+            let text = `=== جميع نتائج التحويل ===\n\n`;
+            text += `تاريخ التصدير: ${new Date().toLocaleString('ar-MA')}\n\n`;
+            
+            const rows = resultsBody.children;
+            for (let row of rows) {
+                const cells = row.children;
+                text += `${cells[0].textContent}:\n`;
+                text += `الإحداثي 1: ${cells[1].textContent}\n`;
+                text += `الإحداثي 2: ${cells[2].textContent}\n`;
+                text += `النطاق: ${cells[3].textContent}\n`;
+                text += `--------------------------------\n\n`;
             }
             
             const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
             const url = URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = url;
-            a.download = `إحداثيات_${new Date().toISOString().slice(0,10)}.txt`;
+            a.download = `جميع_الإحداثيات_${new Date().toISOString().slice(0,10)}.txt`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
             
-            showMessage('تم تصدير الملف بنجاح', 'success');
+            showMessage('تم تحميل جميع الإحداثيات', 'success');
         });
         
-        // النقر على الخريطة لإدخال إحداثيات
+        // النقر على الخريطة لإدخال إحداثيات WGS84
         map.on('click', function(e) {
             const lat = e.latlng.lat;
             const lon = e.latlng.lng;
@@ -813,8 +910,10 @@
             document.getElementById('system').value = 'wgs84';
             showSystem('wgs84');
             
-            const popupContent = createPopupContent('WGS84', lat, lon, null, null);
-            updateMarker(lat, lon, popupContent);
+            updateMarker(lat, lon, true);
+            
+            // تحديث الجدول
+            updateResultsTable(null, null, lat, lon, null);
             
             showMessage(`تم تحديد موقع جديد: ${lat.toFixed(6)}°, ${lon.toFixed(6)}°`, 'info');
         });
@@ -878,9 +977,18 @@
         // تهيئة التطبيق
         setTimeout(() => {
             map.invalidateSize();
-            showMessage('مرحباً بك في نظام تحويل الإحداثيات المغربي!', 'info');
-            document.getElementById('lat').value = '33.5731';
-            document.getElementById('lon').value = '-7.5898';
+            showMessage('مرحباً بك في نظام تحويل الإحداثيات المغربي مع تحديد النطاقات!', 'info');
+            
+            // عرض مثال تلقائي
+            const x = 500000, y = 350000;
+            const zone = detectZone(x, y);
+            const [lon, lat] = proj4(zone, "EPSG:4326", [x, y]);
+            
+            updateMarker(lat, lon, false, {x, y, zone});
+            updateResultsTable(x, y, lat, lon, zone);
+            
+            document.getElementById('x').value = x;
+            document.getElementById('y').value = y;
         }, 500);
     </script>
 </body>
